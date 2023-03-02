@@ -1,9 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { dbService } from "../fbase";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDocs, query } from "firebase/firestore";
 
 const Home = () => {
     const [mweet, setMweet] = useState("");
+    const [mweets, setMweets] = useState([]);
+
+    const getMweets = async () => {
+        const q = query(collection(dbService, "mweets"));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((document) => {
+            const mweetObject = {
+                ...document.data(),
+                id: document.id,
+            };
+            setMweets((prev) => [mweetObject, ...prev]);
+        });
+    };
+
+    useEffect(() => {
+        getMweets();
+    }, []);
     
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -41,8 +58,15 @@ const Home = () => {
                     value="Mweet"
                 />
             </form>
+            <div>
+                {mweets.map((mweet) => (
+                    <div key={mweet.id}>
+                        <h4>{mweet.mweet}</h4>
+                    </div>
+                ))}
+            </div>
         </div>
-    )
-}
+    );
+};
 
 export default Home;
