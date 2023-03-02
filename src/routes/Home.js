@@ -1,33 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { dbService } from "../fbase";
-import { addDoc, collection, getDocs, query } from "firebase/firestore";
+import { addDoc, collection, query, onSnapshot, orderBy } from "firebase/firestore";
 
-const Home = () => {
+const Home = ({ userObj }) => {
     const [mweet, setMweet] = useState("");
     const [mweets, setMweets] = useState([]);
 
-    const getMweets = async () => {
-        const q = query(collection(dbService, "mweets"));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((document) => {
-            const mweetObject = {
-                ...document.data(),
-                id: document.id,
-            };
-            setMweets((prev) => [mweetObject, ...prev]);
-        });
-    };
-
+    // 실시간으로 db 가져오기
     useEffect(() => {
-        getMweets();
-    }, []);
+        const q = query(
+            collection(dbService, "mweets"),
+            orderBy("createdAt", "desc"),
+        );
+        onSnapshot(q, (snapshot) => {
+            const mweetArr = snapshot.docs.map((document) => ({
+                id: document.id,
+                ...document.data(),
+            }));
+            setMweets(mweetArr);
+        })
+    })
     
     const onSubmit = async (e) => {
         e.preventDefault();
         try {
             const docRef = await addDoc(collection(dbService, "mweets"), {
-                mweet,
+                text: mweet,
                 createdAt: Date.now(),
+                creatorId: userObj.uid,
             });
             console.log("Document written with ID: ", docRef);
         } catch (error) {
@@ -61,7 +61,7 @@ const Home = () => {
             <div>
                 {mweets.map((mweet) => (
                     <div key={mweet.id}>
-                        <h4>{mweet.mweet}</h4>
+                        <h4>{mweet.text}</h4>
                     </div>
                 ))}
             </div>
