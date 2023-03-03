@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { dbService, storageService } from "../fbase";
 import { deleteObject, ref } from "firebase/storage";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 
 const Mweet = ({ mweetObj, isOwner }) => {
     const [editing, setEditing] = useState(false);
@@ -33,38 +35,44 @@ const Mweet = ({ mweetObj, isOwner }) => {
             target: { value },
         } = e;
         setNewMweet(value);
-    }
+    };
 
     return (
-        <div>
+        <div className="mweet">
             {editing ? (
                 <>
-                    <form onSubmit={onSubmit}>
+                    <form onSubmit={onSubmit} className="container mweetEdit">
                         <input
                             type="text"
                             placeholder="Edit yout mweet"
                             value={newMweet}
                             onChange={onChange}
                             required
+                            className="formInput"
                         />
                         <input
                             type="submit"
                             value="Update Mweet"
+                            className="formBtn"
                         />
                     </form>
-                    <button onClick={toggleEditing}>Cancel</button>
+                    <button onClick={toggleEditing} className="formBtn cancelBtn">Cancel</button>
                 </>
             ) : (
                 <>
                     <h4>{mweetObj.text}</h4>
-                    {mweetObj.attachmentUrl && (
-                        <img src={mweetObj.attachmentUrl} width="50px" height="50px" />
-                    )}
+                    {mweetObj.attachmentUrl && 
+                        <img src={mweetObj.attachmentUrl} />
+                    }
                     {isOwner && (
-                        <>
-                            <button onClick={onDeleteClick}>Delete Mweet</button>
-                            <button onClick={toggleEditing}>Edit Mweet</button>
-                        </>
+                        <div className="mweet__actions">
+                            <span onClick={onDeleteClick}>
+                                <FontAwesomeIcon icon={faTrash} />
+                            </span>
+                            <span onClick={toggleEditing}>
+                                <FontAwesomeIcon icon={faPencilAlt} />
+                            </span>
+                        </div>
                     )}
                 </>
             )}

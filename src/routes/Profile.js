@@ -29,23 +29,28 @@ const Profile = ({ userObj, refreshUser }) => {
     };
 
     return (
-        <>
-            <form onSubmit={onSubmit}>
+        <div className="container">
+            <form onSubmit={onSubmit} className="profileForm">
                 <input
                     type="text"
                     placeholder="Display name"
                     value={newDisplayName || ""}
                     onChange={onChange}
+                    className="formInput"
                 />
                 <input
                     type="submit"
                     value="Update profile"
+                    className="formBtn"
+                    style={{
+                        marginTop: 10
+                    }}
                 />
             </form>
-            <button onClick={onLogOutClick}>
+            <button onClick={onLogOutClick} className="formBtn cancelBtn logOut">
                 Log Out
             </button>
-        </>
+        </div>
     )
 }
 

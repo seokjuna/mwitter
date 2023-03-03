@@ -20,14 +20,12 @@ const Home = ({ userObj }) => {
             }));
             setMweets(mweetArr);
         })
-    })
-    
-    
+    });
 
     return (
-        <div>
-            <div>
-                <MweetFactory userObj={userObj} />
+        <div className="container">
+            <MweetFactory userObj={userObj} />
+            <div style={{ marginTop: 30 }}>
                 {mweets.map((mweet) => (
                     <Mweet
                         key={mweet.id}
