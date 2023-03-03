@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { doc, deleteDoc, updateDoc } from "firebase/firestore";
-import { dbService } from "../fbase";
+import { dbService, storageService } from "../fbase";
+import { deleteObject, ref } from "firebase/storage";
 
 const Mweet = ({ mweetObj, isOwner }) => {
     const [editing, setEditing] = useState(false);
@@ -11,6 +12,7 @@ const Mweet = ({ mweetObj, isOwner }) => {
         const ok = window.confirm("Are you sure you want to delete this mweet?");
         if (ok) {
             await deleteDoc(MweetTextRef);
+            await deleteObject(ref(storageService, mweetObj.attachmentUrl));
         }
     };
 
