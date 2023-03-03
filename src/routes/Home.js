@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { dbService, storageService } from "../fbase";
-import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
-import { ref, uploadString } from "firebase/storage";
+import { addDoc, collection, query, onSnapshot, orderBy } from "firebase/firestore";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import Mweet from "../components/Mweet";
 
 const Home = ({ userObj }) => {
     const [mweet, setMweet] = useState("");
     const [mweets, setMweets] = useState([]);
-    const [attachment, setAttachment] = useState();
+    const [attachment, setAttachment] = useState("");
+    const fileInput = useRef();
 
     // 실시간으로 db 가져오기
     useEffect(() => {
@@ -27,20 +28,28 @@ const Home = ({ userObj }) => {
     
     const onSubmit = async (e) => {
         e.preventDefault();
-        const fileRef = ref(storageService, `${userObj.uid}/${uuidv4()}`);
-        const response = await uploadString(fileRef, attachment, "data_url");
-        console.log(response);
-        // try {
-        //     const docRef = await addDoc(collection(dbService, "mweets"), {
-        //         text: mweet,
-        //         createdAt: Date.now(),
-        //         creatorId: userObj.uid,
-        //     });
-        //     console.log("Document written with ID: ", docRef);
-        // } catch (error) {
-        //     console.error("Error adding document: ", error);
-        // }
-        // setMweet("");
+        let attachmentUrl = "";
+        if (attachment !== "") {
+            // 파일 경로 참조 만들기
+            const attachmentRef = ref(storageService, `${userObj.uid}/${uuidv4()}`);
+            // stoarge 참조 경로로 파일 업로드 하기
+            const response = await uploadString(attachmentRef, attachment, "data_url");
+            // // storage 참조 경로에 있는 파일의 URL을 다운로드해 attachmentUrl 변수에 넣어서 업데이트
+            attachmentUrl = await getDownloadURL(response.ref);
+        }
+        const mweetObj = {
+            text: mweet,
+            createdAt: Date.now(),
+            creatorId: userObj.uid,
+            attachmentUrl,
+        }
+        // 트윗하기 누르면 nweetObj 형태로 새로운 document를 생성하여 nweets 컬렉션에 넣기
+        await addDoc(collection(dbService, "mweets"), mweetObj);
+        // state 비워서 form 비우기
+        setMweet("");
+        // 파일 미리보기 img src 비우기
+        setAttachment("");
+        fileInput.current.value=null;
     };
 
     const onChange = (e) => {
@@ -65,11 +74,8 @@ const Home = ({ userObj }) => {
         reader.readAsDataURL(theFile);
     };
 
-    const fileInput = useRef();
-
     const onClearAttachment = () => {
-        setAttachment(null);
-        fileInput.current.value = null;
+        setAttachment("");
     }
 
     return (
