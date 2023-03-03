@@ -13,6 +13,10 @@ function App() {
       if (user) {
         setIsLoggedIn(true);
         setUserObj(user);
+        if (user.displayName === null) {
+          const name = user.email.split("@")[0];
+          user.displayName = name;
+        }
       } else {
         setIsLoggedIn (false);
       }
