@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { dbService } from "../fbase";
 import { addDoc, collection, query, onSnapshot, orderBy } from "firebase/firestore";
 import Mweet from "../components/Mweet";
@@ -6,6 +6,7 @@ import Mweet from "../components/Mweet";
 const Home = ({ userObj }) => {
     const [mweet, setMweet] = useState("");
     const [mweets, setMweets] = useState([]);
+    const [attachment, setAttachment] = useState();
 
     // 실시간으로 db 가져오기
     useEffect(() => {
@@ -42,6 +43,28 @@ const Home = ({ userObj }) => {
             target: { value },
         } = e;
         setMweet(value);
+    };
+
+    const onFileChange = (e) => {
+        const {
+            target: { files },
+        } = e;
+        const theFile = files[0];
+        const reader = new FileReader();
+        reader.onloadend = (finishedEvent) => {
+            const {
+                currentTarget: { result }
+            } = finishedEvent;
+            setAttachment(result);
+        }
+        reader.readAsDataURL(theFile);
+    };
+
+    const fileInput = useRef();
+
+    const onClearAttachment = () => {
+        setAttachment(null);
+        fileInput.current.value = null;
     }
 
     return (
@@ -55,9 +78,21 @@ const Home = ({ userObj }) => {
                     maxLength={120}
                 />
                 <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onFileChange}
+                    ref={fileInput}
+                />
+                <input
                     type="submit"
                     value="Mweet"
                 />
+                {attachment && (
+                    <div>
+                        <img src={attachment} width="50px" height="50px" />
+                        <button onClick={onClearAttachment}>Clear</button>
+                    </div>
+                )}
             </form>
             <div>
                 {mweets.map((mweet) => (
