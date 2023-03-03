@@ -12,7 +12,9 @@ const Mweet = ({ mweetObj, isOwner }) => {
         const ok = window.confirm("Are you sure you want to delete this mweet?");
         if (ok) {
             await deleteDoc(MweetTextRef);
-            await deleteObject(ref(storageService, mweetObj.attachmentUrl));
+            if (mweetObj.attachmentUrl !== "") {
+                await deleteObject(ref(storageService, mweetObj.attachmentUrl));
+            }
         }
     };
 
