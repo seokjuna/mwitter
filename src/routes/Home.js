@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { dbService } from "../fbase";
-import { addDoc, collection, query, onSnapshot, orderBy } from "firebase/firestore";
+import { dbService, storageService } from "../fbase";
+import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
+import { ref, uploadString } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 import Mweet from "../components/Mweet";
 
 const Home = ({ userObj }) => {
@@ -25,17 +27,20 @@ const Home = ({ userObj }) => {
     
     const onSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const docRef = await addDoc(collection(dbService, "mweets"), {
-                text: mweet,
-                createdAt: Date.now(),
-                creatorId: userObj.uid,
-            });
-            console.log("Document written with ID: ", docRef);
-        } catch (error) {
-            console.error("Error adding document: ", error);
-        }
-        setMweet("");
+        const fileRef = ref(storageService, `${userObj.uid}/${uuidv4()}`);
+        const response = await uploadString(fileRef, attachment, "data_url");
+        console.log(response);
+        // try {
+        //     const docRef = await addDoc(collection(dbService, "mweets"), {
+        //         text: mweet,
+        //         createdAt: Date.now(),
+        //         creatorId: userObj.uid,
+        //     });
+        //     console.log("Document written with ID: ", docRef);
+        // } catch (error) {
+        //     console.error("Error adding document: ", error);
+        // }
+        // setMweet("");
     };
 
     const onChange = (e) => {
